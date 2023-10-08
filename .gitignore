@@ -1,0 +1,8 @@
+#Visual code
+.vscode/
+
+#Draw.io backup
+*.drawio.bkp
+
+
+target/
