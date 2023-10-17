@@ -25,6 +25,6 @@ public class BusLogFileActivity {
             final ExecutionContext context) {
         context.getLogger().info("Processing file" + fileName);
 
-        return new Random().nextInt(30, 100);
+        return 30;
     }
 }

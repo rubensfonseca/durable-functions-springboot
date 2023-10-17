@@ -17,10 +17,10 @@ public class ReportActivity {
     }
 
     @FunctionName("SendMailReport")
-    public void sendMailReport(
+    public String sendMailReport(
             @DurableActivityTrigger(name = "csv") String csvFile,
             final ExecutionContext context) {
         context.getLogger().info("Sending mail report with" + csvFile);
-
+        return "content";
     }
 }
