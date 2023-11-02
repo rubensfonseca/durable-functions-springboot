@@ -18,9 +18,10 @@
   <properties>
     <java.version>17</java.version>
     <maven.compiler.version>3.11.0</maven.compiler.version>
-
+    <org.projectlombok.lombok.version>1.18.26</org.projectlombok.lombok.version>
     <azure.functions.maven.plugin.version>1.18.0</azure.functions.maven.plugin.version>
     <azure.functions.java.library.version>3.0.0</azure.functions.java.library.version>
+    <azure.storage.version>8.6.6</azure.storage.version>
     <mockito.all.version>1.10.19</mockito.all.version>
     <mockito.junit.jupiter.version>5.3.1</mockito.junit.jupiter.version>
     <durabletask.azure.functions>1.0.0</durabletask.azure.functions>
@@ -42,6 +43,12 @@
         <artifactId>spring-boot-starter-test</artifactId>
         <scope>test</scope>
       </dependency> -->
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${org.projectlombok.lombok.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.microsoft.azure.functions</groupId>
       <artifactId>azure-functions-java-library</artifactId>
@@ -51,6 +58,11 @@
       <groupId>com.microsoft</groupId>
       <artifactId>durabletask-azure-functions</artifactId>
       <version>${durabletask.azure.functions}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+      <version>${azure.storage.version}</version>      <!-- Check for the latest version -->
     </dependency>
 
     <!-- Tests -->
