@@ -78,7 +78,7 @@ class TestReportActivity {
 
         TableClient mockedTableClient = Mockito.mock(TableClient.class);
 
-        doReturn(mockedTableClient).when(spyReportActivityFunction).getTableClient(EcoBusUtil.ECOBUS_LOG_TABLE);
+        doReturn(mockedTableClient).when(spyReportActivityFunction).getTableClient(EcoBusUtil.ECOBUS_REPORT_TABLE);
 
         doReturn(mockedTableEntities()).when(spyReportActivityFunction).listEntities(any());
 

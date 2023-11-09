@@ -31,7 +31,7 @@ public class ReportActivity {
 
     private void saveDailyReport(String date, Map<String, Integer> busLineCountMap) {
 
-        TableClient tableClient = getTableClient(EcoBusUtil.ECOBUS_LOG_TABLE);
+        TableClient tableClient = getTableClient(EcoBusUtil.ECOBUS_REPORT_TABLE);
 
         // Print the counts for each BusLine
         for (Map.Entry<String, Integer> entry : busLineCountMap.entrySet()) {
@@ -39,8 +39,8 @@ public class ReportActivity {
             Map<String, Object> properties = new HashMap<>();
 
             properties.put("Date", date);
-            properties.put("BadgeNumber", entry.getKey());
-            properties.put("Count", entry.getValue());
+            properties.put("BusLineNumber", entry.getKey());
+            properties.put("PassengersCount", entry.getValue());
 
             tableClient.upsertEntity(
                     new TableEntity(EcoBusUtil.ECOBUS_REPORT_TABLE, String.join("_", date, entry.getKey()))
@@ -60,6 +60,7 @@ public class ReportActivity {
     private Iterable<TableEntity> listLogEntries(String date) {
         List<String> propertiesToSelect = new ArrayList<>();
         propertiesToSelect.add("Date");
+        propertiesToSelect.add("BusLineNumber");
 
         return listEntities(new ListEntitiesOptions()
                 .setFilter(String.format("Date eq '%s'", date))

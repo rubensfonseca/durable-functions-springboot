@@ -14,7 +14,7 @@ public class EcoBusUtil {
 
     public static String formatDateUnixTimestamp(long unixTimestamp) {
         // Create a SimpleDateFormat with the desired date-time format
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         // Convert Unix timestamp to Date
         Date date = new Date(unixTimestamp * 1000); // Multiply by 1000 to convert

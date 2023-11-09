@@ -45,9 +45,11 @@ public class TimedOrchestration {
                 // RetryPolicy retryPolicy = new RetryPolicy(2, Duration.ofSeconds(1));
                 // TaskOptions taskOptions = new TaskOptions(retryPolicy);
 
+                String currentDate = "2023-10-19";
+
                 // Get the list of files transfered from the bus
                 List<?> busLogFileList = ctx.callActivity("RecoveryBusLogFiles",
-                                "25/10/2020", List.class).await();
+                                currentDate, List.class).await();
 
                 List<Task<Integer>> logProcessTasks = busLogFileList.stream()
                                 .map(item -> ctx.callActivity("ProcessBusLogFile", item.toString(),
@@ -62,7 +64,7 @@ public class TimedOrchestration {
                                 "Ammount of lines processed " + results.stream().mapToInt(Integer::intValue).sum());
 
                 // Build daily report as csv file for a given date
-                String reportCsvUri = ctx.callActivity("BuildDailyReport", "25/10/2020",
+                String reportCsvUri = ctx.callActivity("BuildDailyReport", currentDate,
                                 String.class).await();
 
                 // Send report by mail
