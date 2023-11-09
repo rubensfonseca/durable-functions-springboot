@@ -2,15 +2,18 @@ package com.rfonseca.example.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.Arrays;
@@ -21,16 +24,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
+import com.azure.data.tables.TableClient;
+import com.azure.data.tables.models.TableEntity;
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 
 @ExtendWith(MockitoExtension.class)
 public class TestBusLogFileActivity {
@@ -60,6 +66,9 @@ public class TestBusLogFileActivity {
 
     @Mock
     private Logger logger;
+
+    @Captor
+    ArgumentCaptor<TableEntity> entityCaptor;
 
     @BeforeEach
     void init() {
@@ -100,26 +109,35 @@ public class TestBusLogFileActivity {
     @DisplayName("Test processing files")
     void processBusLogFile() {
         try {
+
             // Arrange
             BusLogFileActivity spyBusLogFileActivity = spy(new BusLogFileActivity());
 
             // Mock the behavior of getReaderFileName
             BufferedReader mockedReader = Mockito.mock(BufferedReader.class);
 
+            TableClient mockedTableClient = Mockito.mock(TableClient.class);
+
+            // Setup your mock behavior, e.g., doNothing() or any other desired behavior
+            doNothing().when(mockedTableClient).upsertEntity(any());
             doReturn(mockedReader).when(spyBusLogFileActivity).getReaderFileName("example.txt");
+            doReturn(mockedTableClient).when(spyBusLogFileActivity).getTableClient();
 
             // Mock the behavior of readLine
-            when(mockedReader.readLine()).thenReturn("line1", "line2", null);
+            when(mockedReader.readLine()).thenReturn("1697688176 PWB984 13935", "1697689623 CALBS4 13935", null);
 
             // Act
             int result = spyBusLogFileActivity.processBusLogFile("example.txt", executionContext);
 
+            // Verify that the upsertEntity method was called the expected number of times
+            verify(mockedTableClient, times(2)).upsertEntity(entityCaptor.capture());
+
             // Assert
             assertEquals(2, result); // Assuming 2 lines in the mocked file
 
-        } catch (InvalidKeyException | URISyntaxException | StorageException | IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            fail("Exception received: " + e.toString() + " " + e.getStackTrace().toString());
         }
 
     }
