@@ -39,7 +39,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 @ExtendWith(MockitoExtension.class)
-public class TestBusLogFileActivity {
+class TestBusLogFileActivity {
     static class ExecutionContextMock implements ExecutionContext {
 
         @InjectMocks
@@ -99,7 +99,6 @@ public class TestBusLogFileActivity {
             assertEquals(Arrays.asList("file1.txt", "file2.txt"), result);
 
         } catch (InvalidKeyException | URISyntaxException | StorageException e) {
-            // TODO Auto-generated catch block
 
             fail("Exception received: " + e.toString() + " " + e.getStackTrace().toString());
         }
@@ -136,7 +135,6 @@ public class TestBusLogFileActivity {
             assertEquals(2, result); // Assuming 2 lines in the mocked file
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             fail("Exception received: " + e.toString() + " " + e.getStackTrace().toString());
         }
 

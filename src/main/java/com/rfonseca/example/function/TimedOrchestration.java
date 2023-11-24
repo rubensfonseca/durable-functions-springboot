@@ -64,11 +64,11 @@ public class TimedOrchestration {
                                 "Ammount of lines processed " + results.stream().mapToInt(Integer::intValue).sum());
 
                 // Build daily report as csv file for a given date
-                String reportCsvUri = ctx.callActivity("BuildDailyReport", currentDate,
+                ctx.callActivity("BuildDailyReport", currentDate,
                                 String.class).await();
 
                 // Send report by mail
-                ctx.callActivity("SendMailReport", reportCsvUri).await();
+                ctx.callActivity("SendMailReport", currentDate).await();
 
         }
 

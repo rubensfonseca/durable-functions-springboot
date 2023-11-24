@@ -1,6 +1,7 @@
 package com.rfonseca.example.function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -72,7 +73,7 @@ class TestReportActivity {
 
     @Test
     @DisplayName("Test building daily report")
-    void recoveryBusLogFiles() {
+    void testBuildReport() {
 
         ReportActivity spyReportActivityFunction = spy(new ReportActivity());
 
@@ -80,7 +81,7 @@ class TestReportActivity {
 
         doReturn(mockedTableClient).when(spyReportActivityFunction).getTableClient(EcoBusUtil.ECOBUS_REPORT_TABLE);
 
-        doReturn(mockedTableEntities()).when(spyReportActivityFunction).listEntities(any());
+        doReturn(mockedRecordTableEntities()).when(spyReportActivityFunction).listLogsEntities(any());
 
         // Use ArgumentCaptor to capture the argument passed to upsertEntity
         ArgumentCaptor<TableEntity> entityCaptor = ArgumentCaptor.forClass(TableEntity.class);
@@ -96,12 +97,26 @@ class TestReportActivity {
             return null;
         }).when(mockedTableClient).upsertEntity(entityCaptor.capture());
 
-        assertEquals("report.csv", spyReportActivityFunction.buildDailyReport("21/10/2023", executionContext));
+        spyReportActivityFunction.buildDailyReport("21/10/2023", executionContext);
+
         assertEquals(2, capturedEntities.size());
 
     }
 
-    private Iterable<TableEntity> mockedTableEntities() {
+    @Test
+    @DisplayName("Test building daily report")
+    void testSendMailReport() {
+
+        ReportActivity spyReportActivityFunction = spy(new ReportActivity());
+
+        doReturn(mockedReportTableEntities()).when(spyReportActivityFunction).listReportEntities(any());
+
+        assertTrue(
+                spyReportActivityFunction.sendMailReport("2023-10-19", executionContext).contains("Date: 2023-10-19"));
+
+    }
+
+    private Iterable<TableEntity> mockedRecordTableEntities() {
         Map<String, Object> properties1 = new HashMap<>();
         properties1.put("Date", "21/10/2023");
         properties1.put("Time", "10:10:00");
@@ -131,13 +146,21 @@ class TestReportActivity {
         return entities;
     }
 
-    @Test
-    @DisplayName("Test sending mail report")
-    void sendMailReport() {
+    private Iterable<TableEntity> mockedReportTableEntities() {
+        Map<String, Object> properties1 = new HashMap<>();
+        properties1.put("Date", "2023-10-19");
+        properties1.put("PassengersCount", 100);
+        properties1.put("BusLineNumber", "Line 1");
 
-        ReportActivity activityFunction = new ReportActivity();
+        Map<String, Object> properties2 = new HashMap<>();
+        properties2.put("Date", "2023-10-19");
+        properties2.put("PassengersCount", 120);
+        properties2.put("BusLineNumber", "Line 6");
 
-        assertEquals("content", activityFunction.sendMailReport("report.csv", executionContext));
+        List<TableEntity> entities = Arrays.asList(
+                new TableEntity("EcoBusReports", "2023-10-19_Line 1").setProperties(properties1),
+                new TableEntity("EcoBusReports", "2023-10-19_Line 10").setProperties(properties2));
+
+        return entities;
     }
-
 }

@@ -6,11 +6,11 @@ import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 public class EcoBusDailyBatchApp {
-	strictfp public static void main(String[] args) {
+	public static void main(String[] args) {
 
 		ApplicationContext ctx = SpringApplication.run(EcoBusDailyBatchApp.class, args);
 
-		System.out.println("Starting daily batch at ");
+		System.out.println("Starting daily batch at " + ctx.getApplicationName());
 
 	}
 }

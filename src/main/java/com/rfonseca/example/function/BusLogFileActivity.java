@@ -124,7 +124,7 @@ public class BusLogFileActivity {
     }
 
     public BufferedReader getReaderFileName(String fileName)
-            throws InvalidKeyException, URISyntaxException, StorageException, IOException {
+            throws InvalidKeyException, URISyntaxException, StorageException {
         CloudBlockBlob blob = getBlobContainer().getBlockBlobReference(fileName);
 
         return new BufferedReader(

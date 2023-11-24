@@ -16,7 +16,7 @@ import com.rfonseca.example.util.EcoBusUtil;
 public class ReportActivity {
 
     @FunctionName("BuildDailyReport")
-    public String buildDailyReport(
+    public void buildDailyReport(
             @DurableActivityTrigger(name = "date") String date,
             final ExecutionContext context) {
 
@@ -26,7 +26,6 @@ public class ReportActivity {
 
         saveDailyReport(date, busLineCountMap);
 
-        return "report.csv";
     }
 
     private void saveDailyReport(String date, Map<String, Integer> busLineCountMap) {
@@ -51,10 +50,34 @@ public class ReportActivity {
 
     @FunctionName("SendMailReport")
     public String sendMailReport(
-            @DurableActivityTrigger(name = "csv") String csvFile,
+            @DurableActivityTrigger(name = "date") String date,
             final ExecutionContext context) {
-        context.getLogger().info("Sending mail report with" + csvFile);
-        return "content";
+        context.getLogger().info("Sending mail report with" + date);
+
+        List<String> propertiesToSelect = new ArrayList<>();
+        propertiesToSelect.add("BusLineNumber");
+        propertiesToSelect.add("PassengersCount");
+
+        Iterable<TableEntity> reportEntities = listReportEntities(new ListEntitiesOptions()
+                .setFilter(String.format("Date eq '%s'", date))
+                .setSelect(propertiesToSelect));
+
+        // Create the mail content using StringBuilder
+        StringBuilder mailContent = new StringBuilder();
+        mailContent.append("Date: ").append(date).append("\n\n");
+        mailContent.append("<table border=\"1\">");
+        mailContent.append("<tr><th>Bus Line Number</th><th>Passengers Count</th></tr>");
+
+        for (TableEntity entity : reportEntities) {
+            mailContent.append("<tr>");
+            mailContent.append("<td>").append(entity.getProperty("BusLineNumber").toString()).append("</td>");
+            mailContent.append("<td>").append(entity.getProperty("PassengersCount").toString()).append("</td>");
+            mailContent.append("</tr>");
+        }
+
+        mailContent.append("</table>");
+
+        return mailContent.toString();
     }
 
     private Iterable<TableEntity> listLogEntries(String date) {
@@ -62,13 +85,19 @@ public class ReportActivity {
         propertiesToSelect.add("Date");
         propertiesToSelect.add("BusLineNumber");
 
-        return listEntities(new ListEntitiesOptions()
+        return listLogsEntities(new ListEntitiesOptions()
                 .setFilter(String.format("Date eq '%s'", date))
                 .setSelect(propertiesToSelect));
 
     }
 
-    public Iterable<TableEntity> listEntities(ListEntitiesOptions options) {
+    public Iterable<TableEntity> listReportEntities(ListEntitiesOptions options) {
+        TableClient tableClient = getTableClient(EcoBusUtil.ECOBUS_REPORT_TABLE);
+
+        return tableClient.listEntities(options, null, null);
+    }
+
+    public Iterable<TableEntity> listLogsEntities(ListEntitiesOptions options) {
         TableClient tableClient = getTableClient(EcoBusUtil.ECOBUS_LOG_TABLE);
 
         return tableClient.listEntities(options, null, null);
