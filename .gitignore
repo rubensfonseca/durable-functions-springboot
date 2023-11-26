@@ -1,0 +1,11 @@
+#Visual code
+.vscode/
+
+#Draw.io backup
+*.drawio.bkp
+
+
+target/
+
+#cache from python script for test data
+data/__pycache__/**
