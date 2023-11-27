@@ -1,5 +1,6 @@
 package com.rfonseca.example.function;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,9 @@ import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.TimerTrigger;
 import com.microsoft.durabletask.DurableTaskClient;
+import com.microsoft.durabletask.RetryPolicy;
 import com.microsoft.durabletask.Task;
+import com.microsoft.durabletask.TaskOptions;
 import com.microsoft.durabletask.TaskOrchestrationContext;
 import com.microsoft.durabletask.azurefunctions.DurableClientContext;
 import com.microsoft.durabletask.azurefunctions.DurableClientInput;
@@ -20,7 +23,7 @@ public class TimedOrchestration {
 
         @FunctionName("StartBatch")
         public void startBatch(
-                        @TimerTrigger(name = "startBatchTrigger", schedule = "5 * * * * *") String timerInfo,
+                        @TimerTrigger(name = "startBatchTrigger", schedule = "0 0 21 * * *") String timerInfo,
                         @DurableClientInput(name = "durableContext") DurableClientContext durableContext,
                         ExecutionContext context) {
                 // can replace schedule with a variable %CRON_EXPRESSION%
@@ -42,13 +45,10 @@ public class TimedOrchestration {
 
                 context.getLogger().info("Running daily batch orchestration " + ctx.getInstanceId());
 
-                // RetryPolicy retryPolicy = new RetryPolicy(2, Duration.ofSeconds(1));
-                // TaskOptions taskOptions = new TaskOptions(retryPolicy);
-
                 String currentDate = "2023-10-19";
 
                 // Get the list of files transfered from the bus
-                List<?> busLogFileList = ctx.callActivity("RecoveryBusLogFiles",
+                List<?> busLogFileList = ctx.callActivity("RecoverBusLogFiles",
                                 currentDate, List.class).await();
 
                 List<Task<Integer>> logProcessTasks = busLogFileList.stream()
@@ -67,8 +67,12 @@ public class TimedOrchestration {
                 ctx.callActivity("BuildDailyReport", currentDate,
                                 String.class).await();
 
+                
+                RetryPolicy retryPolicy = new RetryPolicy(5, Duration.ofSeconds(60));
+                TaskOptions taskOptions = new TaskOptions(retryPolicy);
+
                 // Send report by mail
-                ctx.callActivity("SendMailReport", currentDate).await();
+                ctx.callActivity("SendMailReport", currentDate, taskOptions).await();
 
         }
 

@@ -82,7 +82,7 @@ class TestBusLogFileActivity {
 
     @Test
     @DisplayName("Test recovering file from the bus")
-    void testRecoveryBusLogFiles() {
+    void testRecoverBusLogFiles() {
 
         try {
 
@@ -93,7 +93,7 @@ class TestBusLogFileActivity {
                     mockCloudBlob("file2.txt"))).when(spyBusLogFileActivity).listBlobs();
 
             // Call the method to be tested
-            List<String> result = spyBusLogFileActivity.recoveryBusLogFiles("21/10/2023", executionContext);
+            List<String> result = spyBusLogFileActivity.recoverBusLogFiles("21/10/2023", executionContext);
 
             // Verify the expected behavior
             assertEquals(Arrays.asList("file1.txt", "file2.txt"), result);

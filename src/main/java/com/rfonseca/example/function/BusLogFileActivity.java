@@ -39,8 +39,8 @@ public class BusLogFileActivity {
 
     private String ecoBusStorageContainer = System.getenv("EcoBusStorageContainer");
 
-    @FunctionName("RecoveryBusLogFiles")
-    public List<String> recoveryBusLogFiles(
+    @FunctionName("RecoverBusLogFiles")
+    public List<String> recoverBusLogFiles(
             @DurableActivityTrigger(name = "date") String date,
             final ExecutionContext context) throws URISyntaxException, InvalidKeyException, StorageException {
 
